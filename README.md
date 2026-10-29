@@ -13,7 +13,11 @@ Sentiment140 and Keras IMDB are both binary datasets, so their models predict po
 
 ## Train in Google Colab and save artifacts to GitHub
 
-1. Create a GitHub personal access token with **Contents: Read and write** access to `isravel-eng/SentimentalAnalyst`.
+The Colab notebook's upload cell can save the model and reports directly to `main`. It needs a GitHub token stored as a Colab Secret named `GITHUB_TOKEN`.
+
+If that secret is not configured, use the built-in GitHub Actions workflow instead: open **Actions**, select **Train sentiment model**, then choose **Run workflow** on `main`. It trains the same Sentiment140 sample and commits the model and reports to the repository without a Colab token.
+
+1. To upload directly from Colab, create a GitHub personal access token with **Contents: Read and write** access to `isravel-eng/SentimentalAnalyst`.
 2. Open the Colab notebook: [`notebooks/train_in_colab.ipynb`](https://colab.research.google.com/github/isravel-eng/SentimentalAnalyst/blob/main/notebooks/train_in_colab.ipynb).
 3. In Colab, open **Secrets** in the left sidebar, create a secret named `GITHUB_TOKEN`, paste the token, and allow the notebook to access it.
 4. Run the notebook cells in order. It installs the packages, downloads Sentiment140 (using a Hugging Face mirror if Stanford's host is unreachable), trains using a balanced sample of up to 100,000 tweets, evaluates the model, and uploads these files to the repository:
