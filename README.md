@@ -16,7 +16,7 @@ Sentiment140 and Keras IMDB are both binary datasets, so their models predict po
 1. Create a GitHub personal access token with **Contents: Read and write** access to `isravel-eng/SentimentalAnalyst`.
 2. Open the Colab notebook: [`notebooks/train_in_colab.ipynb`](https://colab.research.google.com/github/isravel-eng/SentimentalAnalyst/blob/main/notebooks/train_in_colab.ipynb).
 3. In Colab, open **Secrets** in the left sidebar, create a secret named `GITHUB_TOKEN`, paste the token, and allow the notebook to access it.
-4. Run the notebook cells in order. It installs the packages, downloads Sentiment140, trains using a balanced sample of up to 100,000 tweets, evaluates the model, and uploads these files to the repository:
+4. Run the notebook cells in order. It installs the packages, downloads Sentiment140 (using a Hugging Face mirror if Stanford's host is unreachable), trains using a balanced sample of up to 100,000 tweets, evaluates the model, and uploads these files to the repository:
    - `models/sentiment_model.pkl`
    - `reports/evaluation.txt`
    - `reports/evaluation_report.png`
