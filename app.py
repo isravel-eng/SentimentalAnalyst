@@ -25,7 +25,7 @@ def load_model():
 
 if not MODEL_PATH.exists():
     st.warning(
-        "Run the Colab training notebook to create and upload the model, then refresh this app.",
+        "Run the Colab notebook with a GITHUB_TOKEN secret, or start the Train sentiment model workflow from the repository’s Actions tab; then refresh this app.",
         title="Model not found",
     )
     st.stop()
