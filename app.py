@@ -64,5 +64,4 @@ if submitted:
                 st.write(f"**{label.title()}** — {score:.1%}")
                 st.progress(float(score), text=label.title())
 
-st.caption("A simple TF-IDF and Logistic Regression model. Its prediction is an estimate, not a guarantee.")
 
