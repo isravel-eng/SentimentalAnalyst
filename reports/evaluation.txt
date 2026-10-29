@@ -1,0 +1,19 @@
+Dataset: sentiment140 (built-in/default source)
+Rows used: 100000
+Training rows: 80000
+Test rows: 20000
+Accuracy: 0.762
+
+Classification report (precision, recall, F1-score):
+              precision    recall  f1-score   support
+
+    negative       0.77      0.74      0.76     10000
+    positive       0.75      0.78      0.77     10000
+
+    accuracy                           0.76     20000
+   macro avg       0.76      0.76      0.76     20000
+weighted avg       0.76      0.76      0.76     20000
+
+Confusion matrix (actual rows, predicted columns; labels negative, positive):
+[[7446 2554]
+ [2200 7800]]
