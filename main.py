@@ -27,6 +27,10 @@ DEFAULT_MODEL = ROOT / "models" / "sentiment_model.pkl"
 DEFAULT_REPORT = ROOT / "reports" / "evaluation.txt"
 DEFAULT_IMAGE_REPORT = ROOT / "reports" / "evaluation_report.png"
 SENTIMENT140_URL = "https://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip"
+SENTIMENT140_MIRROR_URL = (
+    "https://huggingface.co/datasets/bdanko/sentiment140/resolve/main/"
+    "data/train-00000-of-00001.parquet?download=true"
+)
 SENTIMENT140_CSV = "training.1600000.processed.noemoticon.csv"
 LABELS = ("negative", "neutral", "positive")
 
@@ -59,8 +63,14 @@ def load_data(path: Path, text_column: str, label_column: str) -> pd.DataFrame:
 
 
 def load_sentiment140(path: Path, max_samples: int) -> pd.DataFrame:
-    """Download Sentiment140 from Stanford if needed and convert its labels."""
-    if not path.exists():
+    """Download Sentiment140, falling back to a Hugging Face Parquet mirror."""
+    if path.exists():
+        columns = ["sentiment_id", "id", "date", "query", "user", "text"]
+        data = pd.read_csv(path, encoding="latin-1", header=None, names=columns)
+        data = data[["text", "sentiment_id"]].rename(columns={"sentiment_id": "sentiment"})
+        data["sentiment"] = data["sentiment"].map({0: "negative", 4: "positive"})
+        data = data.dropna(subset=["text", "sentiment"])
+    else:
         path.parent.mkdir(parents=True, exist_ok=True)
         archive = path.parent / "sentiment140.zip"
         print("Downloading Sentiment140 from Stanford (about 80 MB)...")
@@ -72,19 +82,25 @@ def load_sentiment140(path: Path, max_samples: int) -> pd.DataFrame:
                 extracted = path.parent / member
                 if extracted != path:
                     extracted.replace(path)
-        except Exception as error:
-            raise RuntimeError(
-                "Could not download Sentiment140. Check your internet connection, or download "
-                f"{SENTIMENT140_CSV} from the Sentiment140 project page and place it at {path}."
-            ) from error
+        except Exception:
+            archive.unlink(missing_ok=True)
+            parquet_path = path.parent / "sentiment140_huggingface.parquet"
+            print("Stanford is unreachable; trying the Hugging Face dataset mirror...")
+            try:
+                urlretrieve(SENTIMENT140_MIRROR_URL, parquet_path)
+                data = pd.read_parquet(parquet_path, columns=["text", "sentiment"])
+                data["sentiment"] = data["sentiment"].map({0: "negative", 4: "positive"})
+                data = data.dropna(subset=["text", "sentiment"])
+            except Exception as error:
+                parquet_path.unlink(missing_ok=True)
+                raise RuntimeError(
+                    "Could not download Sentiment140 from Stanford or its Hugging Face mirror. "
+                    "Check that this runtime has internet access, or upload the Sentiment140 CSV "
+                    f"to {path}."
+                ) from error
         finally:
             archive.unlink(missing_ok=True)
 
-    columns = ["sentiment_id", "id", "date", "query", "user", "text"]
-    data = pd.read_csv(path, encoding="latin-1", header=None, names=columns)
-    data = data[["text", "sentiment_id"]].rename(columns={"sentiment_id": "sentiment"})
-    data["sentiment"] = data["sentiment"].map({0: "negative", 4: "positive"})
-    data = data.dropna(subset=["text", "sentiment"])
     if max_samples > 0 and len(data) > max_samples:
         per_class = max(1, max_samples // data["sentiment"].nunique())
         data = data.groupby("sentiment", group_keys=False).sample(
